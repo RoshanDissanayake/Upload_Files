@@ -14,14 +14,33 @@ HTML_TEMPLATE = '''
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Upload File</title>
+    <title>Upload Files</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .container {
+        margin-top: 50px;
+      }
+      h1, h2 {
+        margin-bottom: 30px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      ul li {
+        margin-bottom: 10px;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
-      <h1>Upload a File</h1>
+      <h1>Upload Files</h1>
       <form method="post" action="/upload" enctype="multipart/form-data">
         <div class="form-group">
-          <input type="file" name="file" class="form-control-file">
+          <input type="file" name="files" class="form-control-file" multiple>
         </div>
         <button type="submit" class="btn btn-primary">Upload</button>
       </form>
@@ -43,14 +62,15 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
+    if 'files' not in request.files:
         return 'No file part'
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file'
-    if file:
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-        return redirect(url_for('index'))
+    files = request.files.getlist('files')
+    for file in files:
+        if file.filename == '':
+            return 'No selected file'
+        if file:
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+    return redirect(url_for('index'))
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
